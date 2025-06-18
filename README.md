@@ -1,11 +1,11 @@
-# Run DeepSeek r1 Locally with Ollama & Open WebUI
+# Local LLM Stack: Run Any Ollama Model with Open WebUI
 
-Hey there! I put together this microservices setup to run DeepSeek r1 (the latest version) locally using Ollama as the backend engine and Open WebUI as the frontend interface. No cloud services needed - everything runs right on your machine!
+ I put together this flexible microservices setup to run **any Ollama-compatible model** locally. This stack combines [Ollama](https://ollama.ai/) with [Open WebUI](https://github.com/open-webui/open-webui)  to create a complete local AI solution. While it's pre-configured for DeepSeek r1, you can easily swap in any model you prefer!
 
 ## What's in the Box
 
-This repo gives you two separate microservices:
-- **Ollama container**: Handles all the AI model stuff (running DeepSeek r1)
+This repo gives you a reusable template with two separate microservices:
+- **Ollama container**: Handles all the AI model stuff (runs whatever model you choose)
 - **Open WebUI container**: Gives you a clean chat interface to talk to the model
 
 They communicate with each other but run independently - proper microservice architecture!
@@ -18,23 +18,29 @@ They communicate with each other but run independently - proper microservice arc
 2. **Grab this repo**
    ```sh
    git clone <repository-url>
-   cd ollama-deepseek-docker
+   cd local-llm-stack
    ```
 
-3. **Fire it up!**
+3. **Choose your model (optional)**
+   
+   The default is set to DeepSeek r1, but you can easily change it:
+   - Edit the Dockerfile in the ollama directory to replace "deepseek-r1" with any model from [Ollama's library](https://ollama.com/library)
+   - Examples: llama3, mistral, phi3, codellama, etc.
+
+4. **Fire it up!**
    ```sh
    docker compose up -d
    ```
-   > First run will take a while (maybe grab a coffee?) as it downloads the DeepSeek r1 model (~7GB)
+   > First run will take a while (maybe grab a coffee?) as it downloads the model
 
-4. **Start chatting**  
+5. **Start chatting**  
    Just open [http://localhost:8080](http://localhost:8080) in your browser
 
 ## Behind the Scenes
 
 What's actually happening:
-- The Ollama container boots up and automatically downloads DeepSeek r1 if needed
-- The WebUI connects to Ollama's API (they talk to each other through Docker's internal network)
+- The Ollama container boots up and automatically downloads your chosen model if needed
+- The Open WebUI connects to Ollama's API (they talk to each other through Docker's internal network)
 - Everything runs locally - your data stays on your machine
 
 ## Useful Commands
@@ -56,17 +62,21 @@ docker compose logs -f
 docker compose down
 ```
 
-**Nuclear option (removes all data)**
+**Removes all data**
 ```sh
 docker compose down -v
 ```
 
 ## Tips
 
-- DeepSeek r1 is a beast of a model, so performance depends on your hardware
+- Larger models like DeepSeek r1 require decent hardware
 - If you're on a laptop, expect your fans to spin up
 - First responses might be slow as the model warms up
+- Try smaller models like Phi-3 mini if you need faster responses on modest hardware
 
-Enjoy your local AI setup! Let me know if you run into any issues.
+## Credits
 
+This project builds upon these amazing open source projects:
+- [Ollama](https://github.com/ollama/ollama) - For running LLMs locally
+- [Open WebUI](https://github.com/open-webui/open-webui) - For the intuitive chat interface
 
