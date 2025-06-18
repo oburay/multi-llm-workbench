@@ -43,6 +43,47 @@ What's actually happening:
 - The Open WebUI connects to Ollama's API (they talk to each other through Docker's internal network)
 - Everything runs locally - your data stays on your machine
 
+## System Architecture
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                        Your Machine                        │
+│                                                            │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │               Docker Environment                    │   │
+│  │                                                     │   │
+│  │   ┌─────────────────┐         ┌─────────────────┐   │   │
+│  │   │                 │         │                 │   │   │
+│  │   │  Ollama Engine  │◄────────┤   Open WebUI    │   │   │
+│  │   │   Container     │         │    Container    │   │   │
+│  │   │                 │         │                 │   │   │
+│  │   └────────┬────────┘         └────────▲────────┘   │   │
+│  │            │                           │            │   │
+│  │            │                           │            │   │
+│  │   ┌────────▼────────┐                  │            │   │
+│  │   │                 │                  │            │   │
+│  │   │   Ollama Data   │                  │            │   │
+│  │   │     Volume      │                  │            │   │
+│  │   │                 │                  │            │   │
+│  │   └─────────────────┘                  │            │   │
+│  │                                        │            │   │
+│  └────────────────────────────────────────┼────────────┘   │
+│                                           │                │
+│  ┌─────────────────┐                      │                │
+│  │                 │                      │                │
+│  │  Web Browser    │◄─────────────────────┘                │
+│  │                 │                                       │
+│  └─────────────────┘                                       │
+│                                                            │
+└────────────────────────────────────────────────────────────┘
+
+          │                                     │
+          │                                     │
+          ▼                                     ▼
+   Port 11434 (API)                      Port 8080 (UI)
+   (Not exposed externally)              (User access)
+```
+
 ## Useful Commands
 
 When you need to check on things:
