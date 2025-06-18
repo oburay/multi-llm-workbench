@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  ollama:
+    build:
+      context: ./ollama
+      dockerfile: Dockerfile
+    container_name: ollama-engine
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"  # Ollama API
+    restart: unless-stopped
+
+  webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: ollama-webui
+    environment:
+      - OLLAMA_API_BASE_URL=http://ollama:11434
+    ports:
+      - "8080:8080"  # Web UI
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
