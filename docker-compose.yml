@@ -1,27 +1,123 @@
 version: '3.8'
 
 services:
-  ollama:
+  # Ollama model services
+  ollama-deepseek:
     build:
       context: ./ollama
-      dockerfile: Dockerfile
-    container_name: ollama-engine
+      dockerfile: Dockerfile.deepseek
+    container_name: ollama-deepseek
     volumes:
-      - ollama_data:/root/.ollama
+      - ollama_deepseek_data:/root/.ollama
     ports:
-      - "11434:11434"  # Ollama API
+      - "11434:11434"  # Primary model on standard port
     restart: unless-stopped
+    networks:
+      - ollama_network
 
+  ollama-llama3:
+    build:
+      context: ./ollama
+      dockerfile: Dockerfile.llama3
+    container_name: ollama-llama3
+    volumes:
+      - ollama_llama3_data:/root/.ollama
+    ports:
+      - "11435:11434"
+    restart: unless-stopped
+    networks:
+      - ollama_network
+
+  ollama-phi3:
+    build:
+      context: ./ollama
+      dockerfile: Dockerfile.phi3
+    container_name: ollama-phi3
+    volumes:
+      - ollama_phi3_data:/root/.ollama
+    ports:
+      - "11436:11434"
+    restart: unless-stopped
+    networks:
+      - ollama_network
+    
+  ollama-gemma3:
+    build:
+      context: ./ollama
+      dockerfile: Dockerfile.gemma3
+    container_name: ollama-gemma3
+    volumes:
+      - ollama_gemma3_data:/root/.ollama
+    ports:
+      - "11437:11434"
+    restart: unless-stopped
+    networks:
+      - ollama_network
+
+  # You can add more models by following the pattern above
+  # ollama-modelname:
+  #   build:
+  #     context: ./ollama
+  #     dockerfile: Dockerfile.modelname
+  #   container_name: ollama-modelname
+  #   volumes:
+  #     - ollama_modelname_data:/root/.ollama
+  #   ports:
+  #     - "1143X:11434"  # Increment X for each new model
+  #   restart: unless-stopped
+
+  # WebUI to access all models
   webui:
     image: ghcr.io/open-webui/open-webui:main
     container_name: ollama-webui
     environment:
-      - OLLAMA_API_BASE_URL=http://ollama:11434
+      - OLLAMA_BASE_URL=http://ollama-deepseek:11434
+      - OLLAMA_BASE_URLS=http://ollama-deepseek:11434;http://ollama-llama3:11434;http://ollama-phi3:11434;http://ollama-gemma3:11434
+    
     ports:
-      - "8080:8080"  # Web UI
+      - "8080:8080"
     depends_on:
-      - ollama
+      - ollama-deepseek
+      - ollama-llama3
+      - ollama-phi3
+      - ollama-gemma3
     restart: unless-stopped
+    networks:
+      - ollama_network
+      - internet_network
+    
+networks:
+  ollama_network:
+    internal: false  # Allows container-to-container communication
+  internet_network:
+    internal: false  # Allows internet access
 
 volumes:
-  ollama_data:
+  ollama_deepseek_data:
+  ollama_llama3_data:
+  ollama_phi3_data:
+  ollama_gemma3_data:
+
+# ```
+
+# ## How to Access All Models from WebUI
+
+# 1. Open Open WebUI at http://localhost:8080
+# 2. Go to Settings > Endpoints
+# 3. Add additional Ollama servers with these URLs:
+#    - http://ollama-deepseek:11434 (already set as default)
+#    - http://ollama-llama3:11434
+#    - http://ollama-phi3:11434
+#    - http://ollama-gemma3:11434
+
+# ## Adding New Models
+
+# When you create a new Dockerfile for a model:
+
+# 1. Name it `Dockerfile.modelname` in the ollama folder
+# 2. Add a new service section to docker-compose.yml following the pattern above
+# 3. Increment the port number (11438, 11439, etc.)
+# 4. Add a new volume entry
+# 5. Add the model to the WebUI's depends_on list
+
+# This structure keeps each model isolated with its own storage while making them all accessible through a single WebUI interface.
